@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box"></div>
+        <input type="text" id="user-input" placeholder="Escribe tu mensaje...">
+        <button onclick="sendMessage()">Enviar</button>
+    </div>
+    <script>
+        async function sendMessage() {
+            const inputField = document.getElementById("user-input");
+            const chatBox = document.getElementById("chat-box");
+            let userMessage = inputField.value.trim();
+            if (userMessage === "") return;
+            
+            chatBox.innerHTML += `<div class='message user'>${userMessage}</div>`;
+            inputField.value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+            
+            let response = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer TU_API_KEY"
+                },
+                body: JSON.stringify({
+                    model: "gpt-4",
+                    messages: [{"role": "user", "content": userMessage}]
+                })
+            });
+            
+            let data = await response.json();
+            let botMessage = data.choices[0].message.content;
+            chatBox.innerHTML += `<div class='message bot'>${botMessage}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
